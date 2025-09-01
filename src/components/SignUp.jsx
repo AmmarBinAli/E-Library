@@ -67,11 +67,11 @@ export default function SignUp() {
             type="submit"
             className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
           >
-            Login
+            SignUp
           </button>
         </form>
 
-        <div className="flex justify-between items-center mt-6 text-sm text-gray-600">
+        <div className="flex justify-center items-center mt-6 text-sm text-gray-600">
           <Link to="/login" className="hover:text-blue-700">
             Login
           </Link>
