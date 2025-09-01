@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
 
 export default function Login() {
@@ -18,7 +19,7 @@ export default function Login() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Email */}
+          
           <div>
             <label className="block text-gray-700 font-medium mb-2">Email</label>
             <input
@@ -31,7 +32,7 @@ export default function Login() {
             />
           </div>
 
-          {/* Password */}
+          
           <div>
             <label className="block text-gray-700 font-medium mb-2">Password</label>
             <input
@@ -44,7 +45,7 @@ export default function Login() {
             />
           </div>
 
-          {/* Submit Button */}
+          
           <button
             type="submit"
             className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
@@ -53,10 +54,12 @@ export default function Login() {
           </button>
         </form>
 
-        {/* Extra links */}
+        
         <div className="flex justify-between items-center mt-6 text-sm text-gray-600">
           <a href="#" className="hover:text-blue-700">Forgot Password?</a>
-          <a href="#" className="hover:text-blue-700">SignUp</a>
+          <Link to="/signup" className="hover:text-blue-700">
+            SignUp
+          </Link>
         </div>
       </div>
     </div>

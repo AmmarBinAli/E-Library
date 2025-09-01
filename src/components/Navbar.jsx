@@ -11,7 +11,7 @@ export default function Navbar() {
       </div>
 
       {/* Center Menu */}
-      <ul className="flex-1 flex justify-center space-x-16 items-center p-4">
+      <ul className="flex-1 flex justify-center space-x-16 items-center p-4 text-xl">
         <li className="font-semibold cursor-pointer hover:text-white 
         transform transition-transform duration-200 hover:scale-105 ">Home</li>
         <li className="font-semibold cursor-pointer hover:text-white  
