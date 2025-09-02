@@ -66,20 +66,11 @@ export default function SignUp() {
             type="submit"
             className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg"
           >
-<<<<<<< HEAD
             SignUp
           </button>
         </form>
 
         <div className="flex justify-center items-center mt-6 text-sm text-gray-600">
-=======
-            Sign Up
-          </button>
-        </form>
-
-        <div className="mt-6 text-sm text-gray-600 text-center">
-          Already have an account?{" "}
->>>>>>> 5c53d3a42b5962e897a44286814e1d026bd94156
           <Link to="/login" className="hover:text-blue-700">
             Login
           </Link>

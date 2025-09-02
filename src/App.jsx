@@ -3,6 +3,9 @@ import bg from "./assets/bg.jpg";
 import Navbar from "./components/Navbar";
 import Login from "./components/Login";
 import Signup from "./components/SignUp";
+import Library from "./pages/Library";
+import MyBooks from "./pages/MyBooks";
+import Profile from "./pages/Profile";
 
 export default function App() {
   return (
@@ -32,6 +35,10 @@ export default function App() {
           }
         />
 
+        <Route path="/library" element={<Library />} />
+        <Route path="/mybooks" element={<MyBooks />} />
+        <Route path="/profile" element={<Profile />} />
+        
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
       </Routes>
