@@ -10,8 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+<<<<<<< HEAD
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.542.0",
+=======
+    "firebase": "^12.2.1",
+>>>>>>> 5c53d3a42b5962e897a44286814e1d026bd94156
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-pdf": "^10.1.0",
