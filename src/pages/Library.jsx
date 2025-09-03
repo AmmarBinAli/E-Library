@@ -1,10 +1,11 @@
 import { useState } from "react";
 import CategoryFilter from "../components/CatogaryFilter";
 import BookCard from "../components/BookCard";
-
+import UploadBook from "./UploadBooks";
 
 export default function Library() {
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [showUpload, setShowUpload] = useState(false);
 
   const books = [
   {
@@ -36,11 +37,26 @@ export default function Library() {
       ? books
       : books.filter((b) => b.category === selectedCategory);
 
-  return (
+   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Library</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Library</h1>
+        <button
+          onClick={() => setShowUpload(!showUpload)}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+        >
+          {showUpload ? "Close Upload" : "Upload Book"}
+        </button>
+      </div>
+
+      {showUpload && (
+        <div className="mb-6">
+          <UploadBook />
+        </div>
+      )}
+
       <CategoryFilter onCategoryChange={setSelectedCategory} />
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
         {filteredBooks.map((book) => (
           <BookCard key={book.id} book={book} />
         ))}
