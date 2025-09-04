@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { db } from "../backend/firebase";
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import CategoryFilter from "../components/CatogaryFilter";
 import BookCard from "../components/BookCard";
 import UploadBook from "./UploadBooks";
@@ -6,30 +8,21 @@ import UploadBook from "./UploadBooks";
 export default function Library() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showUpload, setShowUpload] = useState(false);
+    const [books, setBooks] = useState([]);
 
-  const books = [
-  {
-    id: 1,
-    title: "The Great Gatsby",
-    author: "F. Scott Fitzgerald",
-    category: "Classic",
-    coverImage: "https://covers.openlibrary.org/b/id/7222246-L.jpg",
-  },
-  {
-    id: 2,
-    title: "Atomic Habits",
-    author: "James Clear",
-    category: "Self Help",
-    coverImage: "https://covers.openlibrary.org/b/id/9878524-L.jpg",
-  },
-  {
-    id: 3,
-    title: "Harry Potter",
-    author: "J.K. Rowling",
-    category: "Fantasy",
-    coverImage: "https://covers.openlibrary.org/b/id/7984916-L.jpg",
-  },
-];
+  //Firestore se books realtime fetch
+  useEffect(() => {
+    const q = query(collection(db, "books"), orderBy("createdAt", "desc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedBooks = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setBooks(fetchedBooks);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
 
   const filteredBooks =
