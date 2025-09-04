@@ -57,6 +57,8 @@ export default function UploadBook() {
           <option value="Classic">Classic</option>
           <option value="Self Help">Self Help</option>
           <option value="Fantasy">Fantasy</option>
+          <option value="History">History</option>
+          <option value="Science">Science</option>
         </select>
         <textarea
           name="description"
