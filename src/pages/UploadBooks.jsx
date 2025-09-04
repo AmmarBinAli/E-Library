@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { db } from "../backend/firebase"; 
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { uploadToCloudinary } from "../utils/uploadToCloudinary";
 
 export default function UploadBook() {
   const [formData, setFormData] = useState({
@@ -10,6 +13,8 @@ export default function UploadBook() {
     coverImage: null,
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     setFormData({
@@ -18,10 +23,55 @@ export default function UploadBook() {
     });
   };
 
-  const handleSubmit = (e) => {
+   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Uploaded Book:", formData);
-    alert("Book upload feature coming soon!");
+    if (!formData.coverImage || !formData.pdfFile) {
+      alert("Please select both Cover Image and PDF.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // 1) Upload cover (image) to Cloudinary
+      const cover = await uploadToCloudinary(formData.coverImage, "image");
+
+      // 2) Upload pdf (raw) to Cloudinary
+      const pdf = await uploadToCloudinary(formData.pdfFile, "pdf");
+      console.log("PDF Upload Response:", pdf);
+
+      // 3) Save document in Firestore
+      await addDoc(collection(db, "books"), {
+        title: formData.title.trim(),
+        author: formData.author.trim(),
+        category: formData.category,
+        description: formData.description?.trim() || "",
+        coverImage: cover.secure_url,
+        fileURL: pdf.secure_url,
+        createdAt: serverTimestamp(),
+      });
+
+      alert("Book uploaded successfully!");
+
+      // reset form
+      setFormData({
+        title: "",
+        author: "",
+        category: "",
+        description: "",
+        pdfFile: null,
+        coverImage: null,
+      });
+
+      // clear file inputs manually
+      document.querySelector('input[name="pdfFile"]').value = "";
+      document.querySelector('input[name="coverImage"]').value = "";
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Upload failed.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -66,25 +116,34 @@ export default function UploadBook() {
           className="w-full border rounded-lg p-2"
           rows="4"
         />
+        <label className="block font-semibold text-gray-700">
+          Select PDF File
+        </label>
         <input
           type="file"
           name="pdfFile"
           accept="application/pdf"
           onChange={handleChange}
           className="w-full"
+          required
         />
+        <label className="block font-semibold text-gray-700">
+        Select Cover Image
+        </label>
         <input
           type="file"
           name="coverImage"
           accept="image/*"
           onChange={handleChange}
           className="w-full"
+          required
         />
         <button
           type="submit"
+           disabled={loading}
           className="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition"
         >
-          Upload
+         {loading ? "Uploading..." : "Upload"}
         </button>
       </form>
     </div>
