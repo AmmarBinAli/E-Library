@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { db } from "../backend/firebase";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import CategoryFilter from "../components/CatogaryFilter";
 import BookCard from "../components/BookCard";
 import UploadBook from "./UploadBooks";
@@ -10,27 +10,22 @@ export default function Library() {
   const [showUpload, setShowUpload] = useState(false);
     const [books, setBooks] = useState([]);
 
-  //Firestore se books realtime fetch
+ // Firestore se data fetch
   useEffect(() => {
-    const q = query(collection(db, "books"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetchedBooks = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setBooks(fetchedBooks);
-    });
-
-    return () => unsubscribe();
+    const fetchBooks = async () => {
+      const snapshot = await getDocs(collection(db, "books"));
+      const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setBooks(list);
+    };
+    fetchBooks();
   }, []);
-
 
   const filteredBooks =
     selectedCategory === "All"
       ? books
       : books.filter((b) => b.category === selectedCategory);
 
-   return (
+  return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Library</h1>

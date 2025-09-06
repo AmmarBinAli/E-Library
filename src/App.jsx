@@ -10,24 +10,6 @@ import Reader from "./pages/Reader";
 
 export default function App() {
 
-    const books = [
-    {
-      id: 1,
-      title: "The Great Gatsby",
-      author: "F. Scott Fitzgerald",
-      category: "Classic",
-      coverImage: "https://covers.openlibrary.org/b/id/7222246-L.jpg",
-      pdfUrl: "/pdfs/gatsby.pdf", // public/pdfs/gatsby.pdf
-    },
-    {
-      id: 2,
-      title: "Moby Dick",
-      author: "Herman Melville",
-      category: "Adventure",
-      coverImage: "https://covers.openlibrary.org/b/id/8101344-L.jpg",
-      pdfUrl: "/pdfs/mobydick.pdf",
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-gray-100  bg-gradient-to-br from-blue-200 via-blue-400 to-blue-600">
@@ -62,8 +44,8 @@ export default function App() {
         
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/book" element= {<Library books={books} />} />
-        <Route path="/reader/:id" element={<Reader books={books} />} />
+        
+        <Route path="/reader/:id" element={<Reader />} /> 
 
       </Routes>
     </div>

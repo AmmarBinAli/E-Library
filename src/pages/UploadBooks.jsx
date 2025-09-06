@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { db } from "../backend/firebase"; 
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { uploadToCloudinary } from "../utils/uploadToCloudinary";
+import { supabase } from "../utils/supabaseClient";
 
 export default function UploadBook() {
   const [formData, setFormData] = useState({
@@ -15,7 +15,7 @@ export default function UploadBook() {
 
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
+const handleChange = (e) => {
     const { name, value, files } = e.target;
     setFormData({
       ...formData,
@@ -23,7 +23,7 @@ export default function UploadBook() {
     });
   };
 
-   const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.coverImage || !formData.pdfFile) {
       alert("Please select both Cover Image and PDF.");
@@ -33,12 +33,29 @@ export default function UploadBook() {
     try {
       setLoading(true);
 
-      // 1) Upload cover (image) to Cloudinary
-      const cover = await uploadToCloudinary(formData.coverImage, "image");
+      // 1) Upload cover image to Supabase Storage
+      const coverPath = `covers/${Date.now()}_${formData.coverImage.name}`;
+      const { error: coverError } = await supabase.storage
+        .from("books")
+        .upload(coverPath, formData.coverImage);
 
-      // 2) Upload pdf (raw) to Cloudinary
-      const pdf = await uploadToCloudinary(formData.pdfFile, "pdf");
-      console.log("PDF Upload Response:", pdf);
+      if (coverError) throw new Error("Cover upload failed: " + coverError.message);
+
+      const { data: coverUrlData } = supabase.storage
+        .from("books")
+        .getPublicUrl(coverPath);
+
+      // 2) Upload PDF to Supabase Storage
+      const pdfPath = `pdfs/${Date.now()}_${formData.pdfFile.name}`;
+      const { error: pdfError } = await supabase.storage
+        .from("books")
+        .upload(pdfPath, formData.pdfFile);
+
+      if (pdfError) throw new Error("PDF upload failed: " + pdfError.message);
+
+      const { data: pdfUrlData } = supabase.storage
+        .from("books")
+        .getPublicUrl(pdfPath);
 
       // 3) Save document in Firestore
       await addDoc(collection(db, "books"), {
@@ -46,8 +63,8 @@ export default function UploadBook() {
         author: formData.author.trim(),
         category: formData.category,
         description: formData.description?.trim() || "",
-        coverImage: cover.secure_url,
-        fileURL: pdf.secure_url,
+        coverImage: coverUrlData.publicUrl,
+        fileURL: pdfUrlData.publicUrl,
         createdAt: serverTimestamp(),
       });
 
@@ -73,6 +90,7 @@ export default function UploadBook() {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="max-w-xl mx-auto bg-white shadow-md rounded-lg p-6">

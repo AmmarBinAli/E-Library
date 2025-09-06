@@ -2,8 +2,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 import { Link } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 
 export default function BookCard({ book }) {
+  const navigate = useNavigate();
   return (
     <Card className="shadow-lg rounded-2xl hover:shadow-xl transition-all bg-white">
       <img
@@ -19,6 +21,7 @@ export default function BookCard({ book }) {
         
         <Link to={`/reader/${book.id}`}>
           <Button
+             onClick={() => navigate(`/reader/${book.id}`)}
             variant="outline"
             size="sm"
             className="mt-3 w-full flex items-center justify-center gap-2"
