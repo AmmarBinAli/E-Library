@@ -4,23 +4,42 @@ import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { auth } from "../backend/firebase";
 import { signOut, onAuthStateChanged } from "firebase/auth";
+import RoleModal from "./ui/RoleModal";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../backend/firebase";
 
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [showRoleModal, setShowRoleModal] = useState(false);
+  const [role, setRole] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+   const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+
+      if (currentUser) {
+        // Firestore se role laa rahe hain
+        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+        if (userDoc.exists()) {
+          setRole(userDoc.data().role);
+        }
+      } else {
+        setRole(null);
+      }
     });
+
     return () => unsubscribe();
   }, []);
 
   const handleLogout = async () => {
     await signOut(auth);
-    navigate("/login");
+    setUser(null);
+    setRole(null);
+    navigate("/");
+    alert("logged out successfully");
   };
 
   return (
@@ -49,6 +68,12 @@ export default function Navbar() {
         </li>
       </ul>
 
+      {role === "admin" && (
+          <Link to="/admin" className="hover:underline">
+            Admin Panel
+          </Link>
+        )}
+
       {/* Right Button (Desktop) */}
       <div className="hidden md:block">
         {user ? (
@@ -59,11 +84,12 @@ export default function Navbar() {
             Logout
           </button>
         ) : (
-          <Link to="/login">
-            <button className="font-semibold w-28 h-12 bg-blue-950 text-white rounded-md shadow-md transition-transform duration-200 hover:scale-105 hover:shadow-lg">
-              My Account
-            </button>
-          </Link>
+         <button
+            onClick={() => setShowRoleModal(true)}
+            className="font-semibold w-28 h-12 bg-blue-950 text-white rounded-md shadow-md"
+          >
+            My Account
+          </button>
         )}
       </div>
 
@@ -110,6 +136,8 @@ export default function Navbar() {
           </li>
         </ul>
       )}
+       {/* Role Modal */}
+      <RoleModal isOpen={showRoleModal} onClose={() => setShowRoleModal(false)} />
     </nav>
   );
 }
