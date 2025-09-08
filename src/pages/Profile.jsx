@@ -1,18 +1,28 @@
+import { auth, db } from "../backend/firebase";
+import { collection, getDocs } from "firebase/firestore";
+import { useEffect, useState } from "react";
+
 export default function Profile() {
+  const user = auth.currentUser;
+  const [totalBooks, setTotalBooks] = useState(0);
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      if (!user) return;
+      const snapshot = await getDocs(collection(db, "users", user.uid, "myBooks"));
+      setTotalBooks(snapshot.size);
+    };
+    fetchBooks();
+  }, [user]);
+
+  if (!user) return <p>Please login to see your profile</p>;
+
   return (
-    <div>
-      <h2 className="text-3xl font-bold mb-6 text-blue-700">My Profile</h2>
-      <div className="bg-white shadow-md rounded-lg p-6 max-w-md">
-        <p className="text-gray-700 mb-2">
-          <span className="font-semibold">Name:</span> Ammar Ali
-        </p>
-        <p className="text-gray-700 mb-2">
-          <span className="font-semibold">Email:</span> ammarali@example.com
-        </p>
-        <p className="text-gray-700">
-          <span className="font-semibold">Joined:</span> September 2025
-        </p>
-      </div>
+    <div className="p-6 flex flex-col gap-4 justify-center items-center">
+      <h2 className="text-2xl font-bold mb-4">Profile</h2>
+      <p><strong>Name:</strong> {user.displayName || "Anonymous"}</p>
+      <p><strong>Email:</strong> {user.email}</p>
+      <p><strong>Total Books Saved:</strong> {totalBooks}</p>
     </div>
   );
 }
