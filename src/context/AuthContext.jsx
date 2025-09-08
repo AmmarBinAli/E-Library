@@ -1,14 +1,14 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../backend/firebase"; // tumhara path sahi hai
+import { auth, db } from "../backend/firebase";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
-  const [role, setRole] = useState(null); // <-- naya state
-  const [loading, setLoading] = useState(true); // optional, loading handle karne ke liye
+  const [role, setRole] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -18,14 +18,22 @@ export const AuthProvider = ({ children }) => {
         try {
           const ref = doc(db, "users", user.uid);
           const snapshot = await getDoc(ref);
+
           if (snapshot.exists()) {
-            setRole(snapshot.data().role); // "admin" / "user"
+            setRole(snapshot.data().role);
           } else {
-            console.warn("Firestore document not found for user:", user.email);
-            setRole(null);
+            // Agar Firestore document missing hai to create default
+            const assignedRole = user.email === "admin@gmail.com" ? "admin" : "user";
+            await setDoc(ref, {
+              uid: user.uid,
+              email: user.email,
+              userName: assignedRole === "admin" ? "Admin" : "User",
+              role: assignedRole,
+            });
+            setRole(assignedRole);
           }
-        } catch (error) {
-          console.error("Firestore fetch error:", error);
+        } catch (err) {
+          console.error("Firestore error:", err);
           setRole(null);
         }
       } else {

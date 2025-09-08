@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { auth, db } from "../backend/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 
 export default function SignUp() {
@@ -16,9 +16,16 @@ export default function SignUp() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
-      // Role assign karo
-      const adminEmail = "admin@gmail.com";
-      const assignedRole = email.toLowerCase() === adminEmail.toLowerCase() ? "admin" : "user";
+let assignedRole = "user";
+const adminEmail = "admin@gmail.com";
+if (email.toLowerCase() === adminEmail.toLowerCase()) {
+  assignedRole = "admin";
+}
+
+ // 🔹 Set Firebase Auth displayName
+    await updateProfile(userCredential.user, {
+      userName: userName || (assignedRole === "admin" ? "Admin" : "User"),
+    });
 
       // Firestore me save karo
       await setDoc(doc(db, "users", userCredential.user.uid), {

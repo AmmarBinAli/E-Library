@@ -2,8 +2,10 @@ import { useState } from "react";
 import { db } from "../backend/firebase"; 
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { supabase } from "../utils/supabaseClient";
+import { useAuth } from "../context/AuthContext";
 
 export default function UploadBook() {
+   const { currentUser } = useAuth();
   const [formData, setFormData] = useState({
     title: "",
     author: "",
@@ -66,6 +68,7 @@ const handleChange = (e) => {
         coverImage: coverUrlData.publicUrl,
         fileURL: pdfUrlData.publicUrl,
         createdAt: serverTimestamp(),
+         uploaderId: currentUser.uid,
       });
 
       alert("Book uploaded successfully!");

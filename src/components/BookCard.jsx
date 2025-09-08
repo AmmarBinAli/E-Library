@@ -2,15 +2,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Trash, BookmarkPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
+import { Pencil, Trash2 } from "lucide-react";
 import { auth, db } from "../backend/firebase";
 import { doc, setDoc, deleteDoc } from "firebase/firestore";
+import { supabase } from "../utils/supabaseClient";
 
 export default function BookCard({
   book,
   showDelete = false,
   showSave = false,
+  showEdit = false, // ✅ new prop for Edit button
+  deleteType = "user", // "user" ya "admin"
   refreshBooks, // 🔹 MyBooks list ko refresh karne ke liye
+  onEdit, // ✅ new callback for opening edit modal
 }) {
   const navigate = useNavigate();
 
@@ -30,7 +34,7 @@ export default function BookCard({
     }
   };
 
-  // Delete book from Firestore
+  // User Delete Mybook from Firestore
   const handleDelete = async () => {
     const user = auth.currentUser;
     if (!user) return;
@@ -41,6 +45,31 @@ export default function BookCard({
       if (refreshBooks) refreshBooks(); // list update
     } catch (error) {
       console.error("Error deleting book:", error);
+    }
+  };
+
+  // ✅ Admin delete from Library + Supabase
+  const handleAdminDelete = async () => {
+    try {
+      // 1) Delete Firestore document
+      await deleteDoc(doc(db, "books", book.id));
+
+      // 2) Delete Supabase files
+      const coverPath = book.coverImage.split("/books/")[1]; // e.g. covers/xyz.png
+      const pdfPath = book.fileURL.split("/books/")[1]; // e.g. pdfs/xyz.pdf
+
+      if (coverPath) {
+        await supabase.storage.from("books").remove([coverPath]);
+      }
+      if (pdfPath) {
+        await supabase.storage.from("books").remove([pdfPath]);
+      }
+
+      alert("Book deleted successfully ✅");
+      if (refreshBooks) refreshBooks();
+    } catch (error) {
+      console.error("Error deleting book:", error);
+      alert("Failed to delete book ❌");
     }
   };
 
@@ -79,10 +108,24 @@ export default function BookCard({
             </Button>
           )}
 
-          {/* Delete Button */}
+           {/* Edit Button (admin only) */}
+          {showEdit && (
+            <Button
+              onClick={() => onEdit(book)}
+              variant="secondary"
+              size="sm"
+              className="flex-1 flex items-center justify-center gap-2"
+            >
+              <Pencil size={16} /> Edit
+            </Button>
+          )}
+
+          {/* Delete Button (Admin/User based on deleteType) */}
           {showDelete && (
             <Button
-              onClick={handleDelete}
+              onClick={
+                deleteType === "admin" ? handleAdminDelete : handleDelete
+              }
               variant="destructive"
               size="sm"
               className="flex-1 flex items-center justify-center gap-2"

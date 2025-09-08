@@ -1,19 +1,22 @@
 import { useState, useEffect } from "react";
 import { db } from "../backend/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc , updateDoc} from "firebase/firestore";
 import CategoryFilter from "../components/CatogaryFilter";
 import BookCard from "../components/BookCard";
 import UploadBook from "./UploadBooks";
 import SearchBar from "../components/SearchBar";
 import { useAuth } from "../context/AuthContext";
+import EditBookModal from "@/components/ui/EditForm"; // ✅ tumhara modal
+
 
 export default function Library() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showUpload, setShowUpload] = useState(false);
   const [books, setBooks] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+   const [editingBook, setEditingBook] = useState(null);
 
- const { role, loading } = useAuth(); // role aur loading context se aa gaye
+ const { role, currentUser, loading } = useAuth(); // role aur loading context se aa gaye
 
   // Firestore se data fetch
   useEffect(() => {
@@ -25,6 +28,43 @@ export default function Library() {
     fetchBooks();
   }, []);
 
+  // Delete function
+  const handleDelete = async (bookId) => {
+    try {
+      await deleteDoc(doc(db, "books", bookId));
+      setBooks((prev) => prev.filter((b) => b.id !== bookId));
+      alert("Book deleted successfully!");
+    } catch (err) {
+      console.error("Delete error:", err);
+    }
+  };
+
+  // ✅ Update function
+  const handleUpdate = async (bookId, updatedData) => {
+    try {
+      if (!bookId) {
+        console.error("Book ID missing for update");
+        return;
+      }
+
+      const cleanData = Object.fromEntries(
+        Object.entries(updatedData).filter(([_, v]) => v !== undefined)
+      );
+
+      await updateDoc(doc(db, "books", bookId), cleanData);
+
+      setBooks((prev) =>
+        prev.map((b) => (b.id === bookId ? { ...b, ...cleanData } : b))
+      );
+
+      alert("Book updated successfully!");
+      setEditingBook(null); // ✅ modal band
+    } catch (err) {
+      console.error("Update error:", err);
+    }
+  };
+
+  // ✅ Filtering
   const filteredBooks = books.filter((book) => {
     const matchesCategory =
       selectedCategory === "All" || book.category === selectedCategory;
@@ -43,7 +83,8 @@ export default function Library() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Library</h1>
-         {/* Sirf Admin ke liye Upload button */}
+
+        {/* Sirf Admin ke liye Upload button */}
         {role === "admin" && (
           <button
             onClick={() => setShowUpload(!showUpload)}
@@ -54,7 +95,7 @@ export default function Library() {
         )}
       </div>
 
-      {/* Upload section bhi sirf admin ke liye */}
+      {/* Upload section */}
       {showUpload && role === "admin" && (
         <div className="mb-6">
           <UploadBook />
@@ -68,24 +109,46 @@ export default function Library() {
       <CategoryFilter onCategoryChange={setSelectedCategory} />
 
       {filteredBooks.length === 0 ? (
-        <p className="text-center text-black-500 mt-10">Loading...</p>
+        <p className="text-center text-black-500 mt-10">No books found...</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
           {filteredBooks.map((book) => (
-            <BookCard
-              key={book.id}
-              book={book}
-              showSave={true} 
-              onSave={(book) => {
-                let saved = JSON.parse(localStorage.getItem("myBooks")) || [];
-                if (!saved.find((b) => b.id === book.id)) {
-                  saved.push(book);
-                  localStorage.setItem("myBooks", JSON.stringify(saved));
-                }
-              }}
-            />
+            <div key={book.id} className="relative">
+              <BookCard
+                book={book}
+                showSave={true}
+                showEdit={role === "admin" && book.uploaderId === currentUser?.uid} // ✅ only admin + apni book
+                onEdit={(book) => setEditingBook(book)} // ✅ modal open
+                onSave={(book) => {
+                  let saved = JSON.parse(localStorage.getItem("myBooks")) || [];
+                  if (!saved.find((b) => b.id === book.id)) {
+                    saved.push(book);
+                    localStorage.setItem("myBooks", JSON.stringify(saved));
+                  }
+                }}
+              />
+
+              {/* Admin Delete */}
+              {role === "admin" && book.uploaderId === currentUser?.uid && (
+                <button
+                  onClick={() => handleDelete(book.id)}
+                  className="absolute top-2 right-2 bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                >
+                  Delete
+                </button>
+              )}
+            </div>
           ))}
         </div>
+      )}
+
+      {/* ✅ Edit Modal */}
+      {editingBook && (
+        <EditBookModal
+          book={editingBook}
+          onSave={(updatedData) => handleUpdate(editingBook.id, updatedData)}
+          onClose={() => setEditingBook(null)} // ✅ Cancel bhi chal jaayega
+        />
       )}
     </div>
   );
