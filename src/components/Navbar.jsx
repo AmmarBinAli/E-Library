@@ -15,6 +15,7 @@ export default function Navbar() {
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [role, setRole] = useState(null);
   const navigate = useNavigate();
+  
 
   useEffect(() => {
    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -45,14 +46,14 @@ export default function Navbar() {
   return (
     <nav className="bg-blue-500 shadow px-6 py-2 flex justify-between items-center relative">
       {/* Logo */}
-      <Link to="/">
+      <Link to="/Admin">
         <div className="flex items-center space-x-2 cursor-pointer">
           <img src={logo} alt="Logo" className="h-16 w-16 object-contain" />
           <span className="font-bold text-2xl text-white">E-Library</span>
         </div>
       </Link>
 
-      {/* Menu Links (Desktop) */}
+      
       <ul className="hidden md:flex flex-1 justify-center space-x-12 items-center text-white text-xl">
         <li className="font-semibold cursor-pointer hover:text-gray-200 transition-transform duration-200 hover:scale-105">
           <Link to="/">Home</Link>
@@ -68,13 +69,13 @@ export default function Navbar() {
         </li>
       </ul>
 
-      {role === "admin" && (
+      {/* {role === "admin" && (
           <Link to="/admin" className="hover:underline">
             Admin Panel
           </Link>
-        )}
+        )} */}
 
-      {/* Right Button (Desktop) */}
+      
       <div className="hidden md:block">
         {user ? (
           <button
@@ -93,14 +94,14 @@ export default function Navbar() {
         )}
       </div>
 
-      {/* Mobile Menu Toggle */}
+      
       <div className="md:hidden flex items-center">
         <button onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <X className="w-8 h-8 text-white" /> : <Menu className="w-8 h-8 text-white" />}
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      
       {isOpen && (
         <ul className="absolute top-full left-0 w-full bg-blue-500 flex flex-col items-center space-y-4 py-4 text-white md:hidden shadow-lg z-10">
           <li className="font-semibold cursor-pointer hover:text-gray-200 transition-transform duration-200 hover:scale-105">
@@ -136,7 +137,7 @@ export default function Navbar() {
           </li>
         </ul>
       )}
-       {/* Role Modal */}
+       
       <RoleModal isOpen={showRoleModal} onClose={() => setShowRoleModal(false)} />
     </nav>
   );

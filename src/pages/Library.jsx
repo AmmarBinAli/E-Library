@@ -59,11 +59,22 @@ export default function Library() {
       <CategoryFilter onCategoryChange={setSelectedCategory} />
 
       {filteredBooks.length === 0 ? (
-        <p className="text-center text-black-500 mt-10">Result Not Found !</p>
+        <p className="text-center text-black-500 mt-10">Loading...</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
           {filteredBooks.map((book) => (
-            <BookCard key={book.id} book={book} />
+            <BookCard
+              key={book.id}
+              book={book}
+              showSave={true} 
+              onSave={(book) => {
+                let saved = JSON.parse(localStorage.getItem("myBooks")) || [];
+                if (!saved.find((b) => b.id === book.id)) {
+                  saved.push(book);
+                  localStorage.setItem("myBooks", JSON.stringify(saved));
+                }
+              }}
+            />
           ))}
         </div>
       )}
