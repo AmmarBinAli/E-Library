@@ -5,12 +5,15 @@ import CategoryFilter from "../components/CatogaryFilter";
 import BookCard from "../components/BookCard";
 import UploadBook from "./UploadBooks";
 import SearchBar from "../components/SearchBar";
+import { useAuth } from "../context/AuthContext";
 
 export default function Library() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showUpload, setShowUpload] = useState(false);
   const [books, setBooks] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+
+ const { role, loading } = useAuth(); // role aur loading context se aa gaye
 
   // Firestore se data fetch
   useEffect(() => {
@@ -34,19 +37,25 @@ export default function Library() {
     return matchesCategory && matchesSearch;
   });
 
+  if (loading) return <p>Loading...</p>;
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Library</h1>
-        <button
-          onClick={() => setShowUpload(!showUpload)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-        >
-          {showUpload ? "Close Upload" : "Upload Book"}
-        </button>
+         {/* Sirf Admin ke liye Upload button */}
+        {role === "admin" && (
+          <button
+            onClick={() => setShowUpload(!showUpload)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+          >
+            {showUpload ? "Close Upload" : "Upload Book"}
+          </button>
+        )}
       </div>
 
-      {showUpload && (
+      {/* Upload section bhi sirf admin ke liye */}
+      {showUpload && role === "admin" && (
         <div className="mb-6">
           <UploadBook />
         </div>
