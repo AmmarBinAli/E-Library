@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { auth, db } from "../backend/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
+import { toast } from "react-toastify";
+
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -22,12 +24,10 @@ if (email.toLowerCase() === adminEmail.toLowerCase()) {
   assignedRole = "admin";
 }
 
- // 🔹 Set Firebase Auth displayName
     await updateProfile(userCredential.user, {
       userName: userName || (assignedRole === "admin" ? "Admin" : "User"),
     });
 
-      // Firestore me save karo
       await setDoc(doc(db, "users", userCredential.user.uid), {
         uid: userCredential.user.uid,
         email: email,
@@ -35,11 +35,11 @@ if (email.toLowerCase() === adminEmail.toLowerCase()) {
         role: assignedRole,
       });
 
-      alert("Signup successful!");
+      toast.success("Signup successful!");
       navigate("/login");
     } catch (error) {
       console.error("Signup Error:", error.code, error.message);
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 

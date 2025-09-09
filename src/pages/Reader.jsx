@@ -3,9 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { db } from "../backend/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import * as pdfjsLib from "pdfjs-dist";
-// import "pdfjs-dist/web/pdf_viewer.css"; // Remove this line
 
-// Set workerSrc for pdf.js
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js";
 
@@ -14,10 +12,10 @@ export default function Reader() {
   const [book, setBook] = useState(null);
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [scale, setScale] = useState(0.9);
+  const [scale, setScale] = useState(1.2);
   const canvasRef = useRef(null);
 
-  const userId = "exampleUserId"; // user id dalna hai yahan auth ka
+  const userId = "exampleUserId";
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -29,6 +27,7 @@ export default function Reader() {
           const data = snapshot.data();
           setBook({ id: snapshot.id, ...data });
 
+          // Load progress
           const progressRef = doc(
             db,
             "userBooks",
@@ -64,7 +63,9 @@ export default function Reader() {
         setNumPages(pdfDoc.numPages);
 
         const page = await pdfDoc.getPage(pageNumber);
+
         const viewport = page.getViewport({ scale });
+
         const canvas = canvasRef.current;
         const context = canvas.getContext("2d");
         canvas.height = viewport.height;
@@ -72,7 +73,7 @@ export default function Reader() {
 
         await page.render({ canvasContext: context, viewport }).promise;
       } catch (err) {
-        alert("Failed to load PDF. Please check the file URL.");
+        console.error("PDF render error:", err);
       }
     };
 
@@ -119,74 +120,65 @@ export default function Reader() {
   }
 
   return (
-  <div className="flex flex-col min-h-screen bg-gray-50 p-4">
-    {/* Container Grid */}
-    <div className="flex flex-col md:flex-row w-full max-w-7xl mx-auto gap-4">
-      
-      {/* Left Column - Book Info */}
-      <div className="md:w-1/5 flex flex-col items-center md:items-start justify-start gap-4">
-        {/* Cover Image */}
-        {book.coverImage ? (
-          <img
-            src={book.coverImage}
-            alt={book.title}
-            className="w-32 h-44 object-cover rounded shadow-md"
-          />
-        ) : (
-          <div className="w-32 h-44 bg-gray-300 rounded flex items-center justify-center text-gray-600">
-            No Cover
+    <div className="flex flex-col min-h-screen bg-gray-50 p-4">
+      <div className="flex flex-col md:flex-row w-full max-w-7xl mx-auto gap-4">
+        <div className="md:w-1/5 flex flex-col items-center md:items-start justify-start gap-4">
+          {book.coverImage ? (
+            <img
+              src={book.coverImage}
+              alt={book.title}
+              className="w-32 h-44 object-cover rounded shadow-md"
+            />
+          ) : (
+            <div className="w-32 h-44 bg-gray-300 rounded flex items-center justify-center text-gray-600">
+              No Cover
+            </div>
+          )}
+          <div className="text-center md:text-left">
+            <h1 className="text-lg md:text-xl font-bold">{book.title}</h1>
+            <p className="text-sm text-gray-600 mt-1">
+              Author: {book.author || "Unknown"}
+            </p>
           </div>
-        )}
-        
-        {/* Book Details */}
-        <div className="text-center md:text-left">
-          <h1 className="text-lg md:text-xl font-bold">{book.title}</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Author: {book.author || "Unknown"}
+        </div>
+
+        <div className="md:w-3/5 flex items-start justify-center border shadow bg-white p-2 md:p-4 h-[75vh] md:h-[85vh] overflow-auto">
+          <canvas ref={canvasRef} className="block rounded shadow" />
+        </div>
+
+        <div className="md:w-1/5 flex flex-col items-center justify-start gap-3">
+          <button
+            onClick={handlePrevPage}
+            disabled={pageNumber <= 1}
+            className="px-3 py-1 w-full bg-gray-300 rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <p className="px-2 py-1 text-sm">
+            Page {pageNumber} of {numPages || "--"}
           </p>
+          <button
+            onClick={handleNextPage}
+            disabled={!numPages || pageNumber >= numPages}
+            className="px-3 py-1 w-full bg-gray-300 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+          <button
+            onClick={() => setScale(scale + 0.2)}
+            className="px-3 py-1 w-full bg-blue-500 text-white rounded"
+          >
+            Zoom In
+          </button>
+          <button
+            onClick={() => setScale(scale - 0.2)}
+            disabled={scale <= 0.6}
+            className="px-3 py-1 w-full bg-blue-500 text-white rounded disabled:opacity-50"
+          >
+            Zoom Out
+          </button>
         </div>
       </div>
-
-      {/* Center Column - PDF Viewer */}
-      <div className="md:w-3/5 flex items-center justify-center border shadow bg-white p-2 md:p-4 h-[75vh] md:h-[85vh] overflow-auto">
-        <canvas ref={canvasRef} className="max-w-full h-auto border" />
-      </div>
-
-      {/* Right Column - Controls */}
-      <div className="md:w-1/5 flex flex-col items-center justify-start gap-3">
-        <button
-          onClick={handlePrevPage}
-          disabled={pageNumber <= 1}
-          className="px-3 py-1 w-full bg-gray-300 rounded disabled:opacity-50"
-        >
-          Previous
-        </button>
-        <p className="px-2 py-1 text-sm">
-          Page {pageNumber} of {numPages || "--"}
-        </p>
-        <button
-          onClick={handleNextPage}
-          disabled={!numPages || pageNumber >= numPages}
-          className="px-3 py-1 w-full bg-gray-300 rounded disabled:opacity-50"
-        >
-          Next
-        </button>
-        <button
-          onClick={() => setScale(scale + 0.2)}
-          className="px-3 py-1 w-full bg-blue-500 text-white rounded"
-        >
-          Zoom In
-        </button>
-        <button
-          onClick={() => setScale(scale - 0.2)}
-          disabled={scale <= 0.6}
-          className="px-3 py-1 w-full bg-blue-500 text-white rounded disabled:opacity-50"
-        >
-          Zoom Out
-        </button>
-      </div>
     </div>
-  </div>
-);
-
+  );
 }

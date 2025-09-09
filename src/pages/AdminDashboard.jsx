@@ -11,15 +11,12 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Users count
       const usersSnapshot = await getDocs(collection(db, "users"));
       setUsersCount(usersSnapshot.size);
 
-      // Books count
       const booksSnapshot = await getDocs(collection(db, "books"));
       setBooksCount(booksSnapshot.size);
 
-      // Category-wise data
       let categoryMap = {};
       booksSnapshot.forEach((doc) => {
         const data = doc.data();
@@ -43,7 +40,6 @@ const AdminDashboard = () => {
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">📊 Admin Dashboard</h1>
 
-      {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="shadow-md">
           <CardContent className="p-6">
@@ -67,7 +63,6 @@ const AdminDashboard = () => {
         </Card>
       </div>
 
-      {/* Chart Section */}
       <Card className="shadow-md">
         <CardContent className="p-6">
           <h2 className="text-lg font-semibold mb-4">Books by Category</h2>

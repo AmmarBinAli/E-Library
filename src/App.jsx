@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
-import bg from "./assets/bg.jpg";
 import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
 import Login from "./components/Login";
 import Signup from "./components/SignUp";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -11,6 +11,8 @@ import MyBooks from "./pages/MyBooks";
 import Profile from "./pages/Profile";
 import Reader from "./pages/Reader";
 import AdminDashboard from "./pages/AdminDashboard";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function App() {
   return (
@@ -18,29 +20,11 @@ export default function App() {
       <Navbar />
 
       <Routes>
-        {/* Home / Landing Page */}
-        <Route
-          path="/"
-          element={
-            <div className="relative w-full">
-              <img src={bg} alt="Background" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 flex flex-col justify-center items-center bg-black bg-opacity-30 text-white px-4 text-center">
-                <h1 className="text-3xl md:text-5xl font-bold mb-4">
-                  Welcome to E-Library
-                </h1>
-                <p className="text-lg md:text-2xl mb-6">
-                  Explore books, manage your library, and more!
-                </p>
-              </div>
-            </div>
-          }
-        />
+        <Route path="/" element={<Home />} />
 
-        {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* Protected User Routes */}
         <Route
           path="/library"
           element={
@@ -74,7 +58,6 @@ export default function App() {
           }
         />
 
-        {/* Admin Only Route */}
         <Route
           path="/admin"
           element={
@@ -84,7 +67,7 @@ export default function App() {
           }
         />
       </Routes>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }
-

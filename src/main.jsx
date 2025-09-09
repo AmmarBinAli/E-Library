@@ -7,7 +7,7 @@ import { AuthProvider } from "./context/AuthContext";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter>
-    <AuthProvider>    {/* <-- Yaha wrap karna hoga */}
+    <AuthProvider>   
         <App />
       </AuthProvider>
   </BrowserRouter>

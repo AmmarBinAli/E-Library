@@ -2,7 +2,7 @@ import { useState } from "react";
 
 export default function CategoryFilter({ onCategoryChange }) {
   const [selected, setSelected] = useState("All");
-  const categories = ["All","General","Classic", "Self Help", "Science", "History", "Fantasy",,"Romance","Horror"];
+  const categories = ["All","General","Classic", "Self Help", "Science", "History", "Fantasy","Romance","Horror"];
 
   const handleChange = (e) => {
     const cat = e.target.value;

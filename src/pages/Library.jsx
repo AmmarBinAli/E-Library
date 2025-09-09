@@ -6,7 +6,7 @@ import BookCard from "../components/BookCard";
 import UploadBook from "./UploadBooks";
 import SearchBar from "../components/SearchBar";
 import { useAuth } from "../context/AuthContext";
-import EditBookModal from "@/components/ui/EditForm"; // ✅ tumhara modal
+import EditBookModal from "@/components/ui/EditForm"; // tumhara modal
 
 
 export default function Library() {
@@ -18,7 +18,6 @@ export default function Library() {
 
  const { role, currentUser, loading } = useAuth(); // role aur loading context se aa gaye
 
-  // Firestore se data fetch
   useEffect(() => {
     const fetchBooks = async () => {
       const snapshot = await getDocs(collection(db, "books"));
@@ -28,7 +27,6 @@ export default function Library() {
     fetchBooks();
   }, []);
 
-  // Delete function
   const handleDelete = async (bookId) => {
     try {
       await deleteDoc(doc(db, "books", bookId));
@@ -39,7 +37,7 @@ export default function Library() {
     }
   };
 
-  // ✅ Update function
+  // Update function
   const handleUpdate = async (bookId, updatedData) => {
     try {
       if (!bookId) {
@@ -58,13 +56,12 @@ export default function Library() {
       );
 
       alert("Book updated successfully!");
-      setEditingBook(null); // ✅ modal band
+      setEditingBook(null); 
     } catch (err) {
       console.error("Update error:", err);
     }
   };
 
-  // ✅ Filtering
   const filteredBooks = books.filter((book) => {
     const matchesCategory =
       selectedCategory === "All" || book.category === selectedCategory;
@@ -84,7 +81,6 @@ export default function Library() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Library</h1>
 
-        {/* Sirf Admin ke liye Upload button */}
         {role === "admin" && (
           <button
             onClick={() => setShowUpload(!showUpload)}
@@ -95,7 +91,6 @@ export default function Library() {
         )}
       </div>
 
-      {/* Upload section */}
       {showUpload && role === "admin" && (
         <div className="mb-6">
           <UploadBook />
@@ -117,8 +112,8 @@ export default function Library() {
               <BookCard
                 book={book}
                 showSave={true}
-                showEdit={role === "admin" && book.uploaderId === currentUser?.uid} // ✅ only admin + apni book
-                onEdit={(book) => setEditingBook(book)} // ✅ modal open
+                showEdit={role === "admin" && book.uploaderId === currentUser?.uid} 
+                onEdit={(book) => setEditingBook(book)} // modal open
                 onSave={(book) => {
                   let saved = JSON.parse(localStorage.getItem("myBooks")) || [];
                   if (!saved.find((b) => b.id === book.id)) {
@@ -128,7 +123,6 @@ export default function Library() {
                 }}
               />
 
-              {/* Admin Delete */}
               {role === "admin" && book.uploaderId === currentUser?.uid && (
                 <button
                   onClick={() => handleDelete(book.id)}
@@ -142,12 +136,11 @@ export default function Library() {
         </div>
       )}
 
-      {/* ✅ Edit Modal */}
       {editingBook && (
         <EditBookModal
           book={editingBook}
           onSave={(updatedData) => handleUpdate(editingBook.id, updatedData)}
-          onClose={() => setEditingBook(null)} // ✅ Cancel bhi chal jaayega
+          onClose={() => setEditingBook(null)} // Cancel bhi chal jaayega
         />
       )}
     </div>

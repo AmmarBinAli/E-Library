@@ -35,7 +35,6 @@ const handleChange = (e) => {
     try {
       setLoading(true);
 
-      // 1) Upload cover image to Supabase Storage
       const coverPath = `covers/${Date.now()}_${formData.coverImage.name}`;
       const { error: coverError } = await supabase.storage
         .from("books")
@@ -47,7 +46,6 @@ const handleChange = (e) => {
         .from("books")
         .getPublicUrl(coverPath);
 
-      // 2) Upload PDF to Supabase Storage
       const pdfPath = `pdfs/${Date.now()}_${formData.pdfFile.name}`;
       const { error: pdfError } = await supabase.storage
         .from("books")
@@ -59,7 +57,6 @@ const handleChange = (e) => {
         .from("books")
         .getPublicUrl(pdfPath);
 
-      // 3) Save document in Firestore
       await addDoc(collection(db, "books"), {
         title: formData.title.trim(),
         author: formData.author.trim(),
@@ -73,7 +70,6 @@ const handleChange = (e) => {
 
       alert("Book uploaded successfully!");
 
-      // reset form
       setFormData({
         title: "",
         author: "",
@@ -83,7 +79,6 @@ const handleChange = (e) => {
         coverImage: null,
       });
 
-      // clear file inputs manually
       document.querySelector('input[name="pdfFile"]').value = "";
       document.querySelector('input[name="coverImage"]').value = "";
     } catch (err) {

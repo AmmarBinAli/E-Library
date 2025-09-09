@@ -11,21 +11,18 @@ export default function Profile() {
       const currentUser = auth.currentUser;
       if (!currentUser) return;
 
-      // Get user profile from Firestore
       const docRef = doc(db, "users", currentUser.uid);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
         setUserData(docSnap.data());
       } else {
-        // fallback agar Firestore me na mile
         setUserData({
           userName: currentUser.displayName || "Anonymous",
           email: currentUser.email,
         });
       }
 
-      // Count saved books
       const booksSnapshot = await getDocs(collection(db, "users", currentUser.uid, "myBooks"));
       setTotalBooks(booksSnapshot.size);
     };

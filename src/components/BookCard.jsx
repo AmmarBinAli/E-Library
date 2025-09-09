@@ -11,14 +11,14 @@ export default function BookCard({
   book,
   showDelete = false,
   showSave = false,
-  showEdit = false, // ✅ new prop for Edit button
-  deleteType = "user", // "user" ya "admin"
-  refreshBooks, // 🔹 MyBooks list ko refresh karne ke liye
-  onEdit, // ✅ new callback for opening edit modal
+  showEdit = false,
+  deleteType = "user", 
+  refreshBooks, 
+  onEdit, 
 }) {
   const navigate = useNavigate();
 
-  // Save book to Firestore under current user
+  
   const handleSave = async () => {
     const user = auth.currentUser;
     if (!user) return alert("Please login to save books");
@@ -34,7 +34,6 @@ export default function BookCard({
     }
   };
 
-  // User Delete Mybook from Firestore
   const handleDelete = async () => {
     const user = auth.currentUser;
     if (!user) return;
@@ -42,21 +41,18 @@ export default function BookCard({
     try {
       await deleteDoc(doc(db, "users", user.uid, "myBooks", book.id));
       alert("Book removed ❌");
-      if (refreshBooks) refreshBooks(); // list update
+      if (refreshBooks) refreshBooks(); 
     } catch (error) {
       console.error("Error deleting book:", error);
     }
   };
 
-  // ✅ Admin delete from Library + Supabase
   const handleAdminDelete = async () => {
     try {
-      // 1) Delete Firestore document
       await deleteDoc(doc(db, "books", book.id));
 
-      // 2) Delete Supabase files
-      const coverPath = book.coverImage.split("/books/")[1]; // e.g. covers/xyz.png
-      const pdfPath = book.fileURL.split("/books/")[1]; // e.g. pdfs/xyz.pdf
+      const coverPath = book.coverImage.split("/books/")[1]; 
+      const pdfPath = book.fileURL.split("/books/")[1]; 
 
       if (coverPath) {
         await supabase.storage.from("books").remove([coverPath]);
@@ -86,7 +82,6 @@ export default function BookCard({
         <p className="text-xs text-gray-500 mt-1">{book.category}</p>
 
         <div className="flex gap-2 mt-3">
-          {/* Read Button */}
           <Button
             onClick={() => navigate(`/reader/${book.id}`)}
             variant="outline"
@@ -96,7 +91,6 @@ export default function BookCard({
             <BookOpen size={16} /> Read
           </Button>
 
-          {/* Save Button */}
           {showSave && (
             <Button
               onClick={handleSave}
@@ -108,7 +102,6 @@ export default function BookCard({
             </Button>
           )}
 
-           {/* Edit Button (admin only) */}
           {showEdit && (
             <Button
               onClick={() => onEdit(book)}
@@ -120,7 +113,6 @@ export default function BookCard({
             </Button>
           )}
 
-          {/* Delete Button (Admin/User based on deleteType) */}
           {showDelete && (
             <Button
               onClick={
